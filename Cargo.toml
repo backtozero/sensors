@@ -5,5 +5,5 @@ authors = ["khachmakhov <gotozero@ya.ru>"]
 
 [dependencies]
 i2csensors = "0.1.*"
-i2cdev-lsm9ds0 = "0.1.*"
+i2cdev-lsm9ds0 = { git = "https://github.com/backtozero/i2cdev-sensors.git", branch = "master" }
 i2cdev-bmp280 = { git = "https://github.com/backtozero/i2cdev-sensors.git", branch = "master" }

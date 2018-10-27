@@ -37,7 +37,7 @@ fn main() {
     };
 
 
-    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices().unwrap();
+    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x6A, 0x1E).unwrap();
 
     let gyro_settings = LSM9DS0GyroscopeSettings {
         DR: LSM9DS0GyroscopeDataRate::Hz190,
