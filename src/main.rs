@@ -7,7 +7,7 @@ use i2cdev_bmp280::*;
 use i2cdev_l3gd20::*;
 use i2cdev_lsm9ds0::*;
 use i2csensors::{Accelerometer, Barometer, Gyroscope, Magnetometer, Thermometer, Vec3};
-use std::process;
+use std::{process, thread, time};
 
 fn main() {
     // bmp280
@@ -23,21 +23,8 @@ fn main() {
             power_mode: BMP280PowerMode::NormalMode,
         };
 
-    let bmp280 = BMP280::new(i2c_device, settings);
+    let mut bmp280 = BMP280::new(i2c_device, settings).unwrap();
 
-    match bmp280 {
-        Ok(mut device) => {
-            let temperature = device.temperature_celsius().unwrap();
-            let pressure = device.pressure_kpa().unwrap();
-
-            println!("Temperature: {}", temperature);
-            println!("Pressure: {}", pressure);
-        }
-        Err(e) => {
-            println!("Error while getting new BMP280 {:#?}", e);
-            process::exit(1)
-        }
-    };
 
     // lsm9ds0
     let (gyro_dev, accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x6B, 0x1E).unwrap();
@@ -73,19 +60,6 @@ fn main() {
 
     let mut lsm9ds0 = LSM9DS0::new(accel_dev, gyro_dev, gyro_settings, accel_mag_settings).unwrap();
 
-    match lsm9ds0.acceleration_reading() {
-        Ok(v) => {
-            println!("acceleration_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
-        }
-        Err(e) => println!("acceleration_reading error: {}", e),
-    }
-
-    match lsm9ds0.angular_rate_reading() {
-        Ok(v) => {
-            println!("angular_rate_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
-        }
-        Err(e) => println!("angular_rate_reading error: {}", e),
-    }
 
     // L3GD20
 
@@ -109,5 +83,30 @@ fn main() {
 
     let angular_rate = l3gd20_gyro.angular_rate_reading().unwrap();
 
-    println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
+    loop {
+        let temperature = bmp280.temperature_celsius().unwrap();
+        let pressure = bmp280.pressure_kpa().unwrap();
+
+        println!("bmp280 Temperature: {}", temperature);
+        println!("bmp280 Pressure: {}", pressure);
+
+        match lsm9ds0.acceleration_reading() {
+            Ok(v) => {
+                println!("lsm9ds0 acceleration_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
+            }
+            Err(e) => println!("lsm9ds0 acceleration_reading error: {}", e),
+        }
+
+        match lsm9ds0.angular_rate_reading() {
+            Ok(v) => {
+                println!("lsm9ds0 angular_rate_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
+            }
+            Err(e) => println!(" lsm9ds0 angular_rate_reading error: {}", e),
+        }
+
+
+        println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
+
+        thread::sleep(time::Duration::from_millis(300));
+    }
 }
