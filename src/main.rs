@@ -1,13 +1,16 @@
 extern crate i2cdev_bmp280;
+extern crate i2cdev_l3gd20;
 extern crate i2cdev_lsm9ds0;
 extern crate i2csensors;
 
 use i2cdev_bmp280::*;
+use i2cdev_l3gd20::*;
 use i2cdev_lsm9ds0::*;
-use i2csensors::{Accelerometer, Barometer, Gyroscope, Magnetometer, Thermometer};
+use i2csensors::{Accelerometer, Barometer, Gyroscope, Magnetometer, Thermometer, Vec3};
 use std::process;
 
 fn main() {
+    // bmp280
     let i2c_device = i2cdev_bmp280::get_linux_bmp280_i2c_device_with_addr(0x76).unwrap();
 
     let settings = BMP280Settings
@@ -36,8 +39,8 @@ fn main() {
         }
     };
 
-
-    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x6B, 0x1E).unwrap();
+    // lsm9ds0
+    let (gyro_dev, accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x6B, 0x1E).unwrap();
 
     let gyro_settings = LSM9DS0GyroscopeSettings {
         DR: LSM9DS0GyroscopeDataRate::Hz190,
@@ -50,7 +53,7 @@ fn main() {
         continuous_update: true,
         high_pass_filter_enabled: true,
         high_pass_filter_mode: Some(LSM9DS0GyroscopeHighPassFilterMode::NormalMode),
-        high_pass_filter_configuration: Some(LSM9DS0HighPassFilterCutOffConfig::HPCF_0)
+        high_pass_filter_configuration: Some(LSM9DS0HighPassFilterCutOffConfig::HPCF_0),
     };
 
     let accel_mag_settings = LSM9DS0AccelerometerMagnetometerSettings {
@@ -65,22 +68,46 @@ fn main() {
         magnetometer_data_rate: LSM9DS0MagnetometerUpdateRate::Hz50,
         magnetometer_low_power_mode: false,
         magnetometer_mode: LSM9DS0MagnetometerMode::ContinuousConversion,
-        magnetometer_sensitivity: LSM9DS0MagnetometerFS::gauss2
+        magnetometer_sensitivity: LSM9DS0MagnetometerFS::gauss2,
     };
 
     let mut lsm9ds0 = LSM9DS0::new(accel_dev, gyro_dev, gyro_settings, accel_mag_settings).unwrap();
 
-    match  lsm9ds0.acceleration_reading() {
-        Ok(v) =>  {
-            println!("acceleration_reading: X:{}; y{}; z{}", v.x, v.y, v.z);
-        },
+    match lsm9ds0.acceleration_reading() {
+        Ok(v) => {
+            println!("acceleration_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
+        }
         Err(e) => println!("acceleration_reading error: {}", e),
     }
 
-    match  lsm9ds0.angular_rate_reading() {
-        Ok(v) =>  {
-            println!("angular_rate_reading: X:{}; y{}; z{}", v.x, v.y, v.z);
-        },
+    match lsm9ds0.angular_rate_reading() {
+        Ok(v) => {
+            println!("angular_rate_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
+        }
         Err(e) => println!("angular_rate_reading error: {}", e),
     }
+
+    // L3GD20
+
+    let settings = L3GD20GyroscopeSettings {
+        DR: L3GD20GyroscopeDataRate::Hz190,
+        BW: L3GD20GyroscopeBandwidth::BW1,
+        power_mode: L3GD20PowerMode::Normal,
+        zen: true,
+        yen: true,
+        xen: true,
+        sensitivity: L3GD20GyroscopeFS::dps500,
+        continuous_update: true,
+        high_pass_filter_enabled: true,
+        high_pass_filter_mode: Some(L3GD20GyroscopeHighPassFilterMode::NormalMode),
+        high_pass_filter_configuration: Some(L3GD20HighPassFilterCutOffConfig::HPCF_0),
+    };
+
+    let mut i2cdev = get_linux_l3gd20_i2c_device().unwrap();
+
+    let mut l3gd20_gyro = L3GD20::new(i2cdev, settings).unwrap();
+
+    let angular_rate = l3gd20_gyro.angular_rate_reading().unwrap();
+
+    println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
 }
