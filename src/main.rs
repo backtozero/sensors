@@ -81,32 +81,32 @@ fn main() {
 
     let mut l3gd20_gyro = L3GD20::new(i2cdev, settings).unwrap();
 
-    let angular_rate = l3gd20_gyro.angular_rate_reading().unwrap();
 
-    loop {
-        let temperature = bmp280.temperature_celsius().unwrap();
-        let pressure = bmp280.pressure_kpa().unwrap();
+    // loop
 
-        println!("bmp280 Temperature: {}", temperature);
-        println!("bmp280 Pressure: {}", pressure);
+    let temperature = bmp280.temperature_celsius().unwrap();
+    let pressure = bmp280.pressure_kpa().unwrap();
 
-        match lsm9ds0.acceleration_reading() {
-            Ok(v) => {
-                println!("lsm9ds0 acceleration_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
-            }
-            Err(e) => println!("lsm9ds0 acceleration_reading error: {}", e),
+    println!("bmp280 Temperature: {}", temperature);
+    println!("bmp280 Pressure: {}", pressure);
+
+    match lsm9ds0.acceleration_reading() {
+        Ok(v) => {
+            println!("lsm9ds0 acceleration_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
         }
-
-        match lsm9ds0.angular_rate_reading() {
-            Ok(v) => {
-                println!("lsm9ds0 angular_rate_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
-            }
-            Err(e) => println!(" lsm9ds0 angular_rate_reading error: {}", e),
-        }
-
-
-        println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
-
-        thread::sleep(time::Duration::from_millis(300));
+        Err(e) => println!("lsm9ds0 acceleration_reading error: {}", e),
     }
+
+    match lsm9ds0.angular_rate_reading() {
+        Ok(v) => {
+            println!("lsm9ds0 angular_rate_reading: X: {}; y: {}; z: {}", v.x, v.y, v.z);
+        }
+        Err(e) => println!(" lsm9ds0 angular_rate_reading error: {}", e),
+    }
+
+
+    let angular_rate = l3gd20_gyro.angular_rate_reading().unwrap();
+    println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
+
+    thread::sleep(time::Duration::from_millis(300));
 }
