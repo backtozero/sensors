@@ -37,7 +37,7 @@ fn main() {
     };
 
 
-    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x1E, 0x6B).unwrap();
+    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices_with_addr(0x6B, 0x1E).unwrap();
 
     let gyro_settings = LSM9DS0GyroscopeSettings {
         DR: LSM9DS0GyroscopeDataRate::Hz190,
@@ -69,4 +69,18 @@ fn main() {
     };
 
     let mut lsm9ds0 = LSM9DS0::new(accel_dev, gyro_dev, gyro_settings, accel_mag_settings).unwrap();
+
+    match  lsm9ds0.acceleration_reading() {
+        Ok(v) =>  {
+            println!("acceleration_reading: X:{}; y{}; z{}", v.x, v.y, v.z);
+        },
+        Err(e) => println!("acceleration_reading error: {}", e),
+    }
+
+    match  lsm9ds0.angular_rate_reading() {
+        Ok(v) =>  {
+            println!("angular_rate_reading: X:{}; y{}; z{}", v.x, v.y, v.z);
+        },
+        Err(e) => println!("angular_rate_reading error: {}", e),
+    }
 }
