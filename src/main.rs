@@ -11,6 +11,7 @@ use std::{process, thread, time::Duration, time::Instant};
 use std::io::stdin;
 
 fn main() {
+/*
     // bmp280
     let i2c_device = i2cdev_bmp280::get_linux_bmp280_i2c_device_with_addr(0x76).unwrap();
 
@@ -108,6 +109,7 @@ fn main() {
     let angular_rate = l3gd20_gyro.angular_rate_reading().unwrap();
     println!("L3GD20 angular_rate_reading: X: {}; y: {}; z: {}", angular_rate.x, angular_rate.y, angular_rate.z);
 
+*/
 
     // LSM9DS0
     println!("LSM9DS0 Accelerometer Magnetometer Gyroscope.");
