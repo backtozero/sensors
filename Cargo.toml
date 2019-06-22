@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["khachmakhov <gotozero@ya.ru>"]
 
 [dependencies]
-i2cdev = "0.4.*"
+i2cdev = "0.3.1"
 i2csensors = "0.1.*"
 pca9685 = "0.1.*"
 i2cdev-l3gd20 = { git = "https://github.com/martindeegan/i2cdev-sensors.git", branch = "master" }
