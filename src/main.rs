@@ -2,6 +2,7 @@ extern crate i2cdev_bmp280;
 extern crate i2cdev_l3gd20;
 extern crate i2cdev_lsm9ds0;
 extern crate i2csensors;
+extern crate pca9685;
 
 use i2cdev_bmp280::*;
 use i2cdev_l3gd20::*;
@@ -9,6 +10,77 @@ use i2cdev_lsm9ds0::*;
 use i2csensors::{Accelerometer, Barometer, Gyroscope, Magnetometer, Thermometer, Vec3};
 use std::{process, thread, time::Duration, time::Instant};
 use std::io::stdin;
+
+use pca9685::*;
+use std::thread::sleep;
+
+
+const MAX_VALUE: f32 = 2000.0;
+const MIN_VALUE: f32 = 100.0;
+
+
+fn main1() {
+    println!("Initialization...");
+    println!("When you are ready press enter");
+    let mut input = String::new();
+    stdin().read_line(&mut input).expect("Error");
+
+
+    let device = match LinuxI2CDevice::new("/dev/i2c-1", 0x40) {
+        Ok(device) => device,
+        Err(e) => {
+            println!("Error Initializing Motor Manager.");
+            return;
+        }
+    };
+
+    let mut pca9685 = PCA9685::new(device, 50).unwrap();
+    pca9685.set_all_duty_cycle(0).unwrap();
+    pca9685.set_frequency(100).unwrap();
+
+// calibration
+    println!("Calibrating... setting MAX_VALUE");
+    pca9685.set_all_duty_cycle(0);
+    pca9685.set_all_pulse_length(MAX_VALUE);
+
+    println!("Wait for another beep and press enter. Will set MIN_VALUE");
+    let mut input = String::new();
+    stdin().read_line(&mut input).expect("Error");
+    pca9685.set_all_pulse_length(MIN_VALUE);
+    sleep(Duration::from_millis(20));
+    pca9685.set_all_duty_cycle(0);
+    sleep(Duration::from_secs(1));
+
+
+    println!("Start series of testings ");
+    let mut input = String::new();
+    stdin().read_line(&mut input).expect("Error");
+
+    println!("200");
+    pca9685.set_all_pulse_length(200.0);
+    sleep(Duration::from_millis(5000));
+
+    println!("400");
+    pca9685.set_all_pulse_length(400.0);
+    sleep(Duration::from_millis(5000));
+
+
+/*    println!("800");
+    pca9685.set_all_pulse_length(800.0);
+    sleep(Duration::from_millis(5000));
+
+    println!("1000");
+    pca9685.set_all_pulse_length(1000.0);
+    sleep(Duration::from_millis(5000));
+
+    println!("1200");
+    pca9685.set_all_pulse_length(1200.0);
+    sleep(Duration::from_millis(5000));*/
+
+
+    pca9685.set_all_duty_cycle(0).unwrap();
+}
+
 
 fn main() {
 /*
@@ -113,7 +185,10 @@ fn main() {
 
     // LSM9DS0
     println!("LSM9DS0 Accelerometer Magnetometer Gyroscope.");
-    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices().unwrap();
+//    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices().unwrap();
+
+    let gyro_dev = try!(LinuxI2CDevice::new("/dev/i2c-1", 0x6b));
+    let accel_dev = try!(LinuxI2CDevice::new("/dev/i2c-1", LSM9DS0_I2C_ADDR_ACCEL_MAG));
 
     let gyro_settings = LSM9DS0GyroscopeSettings {
         DR: LSM9DS0GyroscopeDataRate::Hz190,
