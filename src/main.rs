@@ -125,7 +125,7 @@ fn main() {
     println!("LSM9DS0 Accelerometer Magnetometer Gyroscope.");
 //    let (gyro_dev,accel_dev) = get_default_lsm9ds0_linux_i2c_devices().unwrap();
 
-    let gyro_dev = LinuxI2CDevice::new("/dev/i2c-1", 0x6b).unwrap();
+    let gyro_dev = LinuxI2CDevice::new("/dev/i2c-1", 0x6B).unwrap();
     let accel_dev = LinuxI2CDevice::new("/dev/i2c-1", LSM9DS0_I2C_ADDR_ACCEL_MAG).unwrap();
 
     let gyro_settings = LSM9DS0GyroscopeSettings {
